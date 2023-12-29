@@ -4,6 +4,8 @@ TPS Practice for DOTS
 # 그래픽 리소스는 유니티 에셋스토어를 이용한다.
 # 목표 구현
 - TPS 조종
+<br>https://youtu.be/-BEkACH80F8
+  
 - Enities의 Streaming 로딩을 이용한 빠른 로딩 구현
 - 인벤토리
 - 투척 무기(수류탄)
