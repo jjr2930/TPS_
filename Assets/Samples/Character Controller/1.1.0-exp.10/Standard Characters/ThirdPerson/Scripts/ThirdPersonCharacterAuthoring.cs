@@ -13,6 +13,9 @@ public class ThirdPersonCharacterAuthoring : MonoBehaviour
     
     public float RotationSharpness = 25f;
     public float GroundMaxSpeed = 10f;
+    public float walkingMaxSpeed = 1.3f;
+    public float runningMaxSpeed = 2.6f;
+
     public float GroundedMovementSharpness = 15f;
     public float AirAcceleration = 50f;
     public float AirMaxSpeed = 10f;
@@ -35,6 +38,8 @@ public class ThirdPersonCharacterAuthoring : MonoBehaviour
             {
                 RotationSharpness = authoring.RotationSharpness,
                 GroundMaxSpeed = authoring.GroundMaxSpeed,
+                runningMaxSpeed = authoring.runningMaxSpeed,
+                walkingMaxSpeed = authoring.walkingMaxSpeed,
                 GroundedMovementSharpness = authoring.GroundedMovementSharpness,
                 AirAcceleration = authoring.AirAcceleration,
                 AirMaxSpeed = authoring.AirMaxSpeed,
@@ -43,7 +48,7 @@ public class ThirdPersonCharacterAuthoring : MonoBehaviour
                 Gravity = authoring.Gravity,
                 PreventAirAccelerationAgainstUngroundedHits = authoring.PreventAirAccelerationAgainstUngroundedHits,
                 StepAndSlopeHandling = authoring.StepAndSlopeHandling,
-            });
+            }) ;
 
             AddComponent(entity, new ThirdPersonCharacterControl());
 

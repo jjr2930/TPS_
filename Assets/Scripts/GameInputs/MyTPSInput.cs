@@ -64,6 +64,24 @@ namespace MyTPS
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Walking"",
+                    ""type"": ""Button"",
+                    ""id"": ""7d2c2e3d-12ca-4db3-9433-b07c39b1b9fd"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Aim"",
+                    ""type"": ""Button"",
+                    ""id"": ""73dfbd7d-5dba-448d-8c8f-cb24b2c356fa"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -176,6 +194,28 @@ namespace MyTPS
                     ""action"": ""CameraZoom"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""83e4f525-496a-4ac0-8645-b83806793e66"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Walking"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""17e0aee7-1ec1-4aa6-a42e-c8a63ca367fb"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Aim"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -188,6 +228,8 @@ namespace MyTPS
             m_HumanAction_Jump = m_HumanAction.FindAction("Jump", throwIfNotFound: true);
             m_HumanAction_Look = m_HumanAction.FindAction("Look", throwIfNotFound: true);
             m_HumanAction_CameraZoom = m_HumanAction.FindAction("CameraZoom", throwIfNotFound: true);
+            m_HumanAction_Walking = m_HumanAction.FindAction("Walking", throwIfNotFound: true);
+            m_HumanAction_Aim = m_HumanAction.FindAction("Aim", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -253,6 +295,8 @@ namespace MyTPS
         private readonly InputAction m_HumanAction_Jump;
         private readonly InputAction m_HumanAction_Look;
         private readonly InputAction m_HumanAction_CameraZoom;
+        private readonly InputAction m_HumanAction_Walking;
+        private readonly InputAction m_HumanAction_Aim;
         public struct HumanActionActions
         {
             private @MyTPSInput m_Wrapper;
@@ -261,6 +305,8 @@ namespace MyTPS
             public InputAction @Jump => m_Wrapper.m_HumanAction_Jump;
             public InputAction @Look => m_Wrapper.m_HumanAction_Look;
             public InputAction @CameraZoom => m_Wrapper.m_HumanAction_CameraZoom;
+            public InputAction @Walking => m_Wrapper.m_HumanAction_Walking;
+            public InputAction @Aim => m_Wrapper.m_HumanAction_Aim;
             public InputActionMap Get() { return m_Wrapper.m_HumanAction; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -282,6 +328,12 @@ namespace MyTPS
                 @CameraZoom.started += instance.OnCameraZoom;
                 @CameraZoom.performed += instance.OnCameraZoom;
                 @CameraZoom.canceled += instance.OnCameraZoom;
+                @Walking.started += instance.OnWalking;
+                @Walking.performed += instance.OnWalking;
+                @Walking.canceled += instance.OnWalking;
+                @Aim.started += instance.OnAim;
+                @Aim.performed += instance.OnAim;
+                @Aim.canceled += instance.OnAim;
             }
 
             private void UnregisterCallbacks(IHumanActionActions instance)
@@ -298,6 +350,12 @@ namespace MyTPS
                 @CameraZoom.started -= instance.OnCameraZoom;
                 @CameraZoom.performed -= instance.OnCameraZoom;
                 @CameraZoom.canceled -= instance.OnCameraZoom;
+                @Walking.started -= instance.OnWalking;
+                @Walking.performed -= instance.OnWalking;
+                @Walking.canceled -= instance.OnWalking;
+                @Aim.started -= instance.OnAim;
+                @Aim.performed -= instance.OnAim;
+                @Aim.canceled -= instance.OnAim;
             }
 
             public void RemoveCallbacks(IHumanActionActions instance)
@@ -321,6 +379,8 @@ namespace MyTPS
             void OnJump(InputAction.CallbackContext context);
             void OnLook(InputAction.CallbackContext context);
             void OnCameraZoom(InputAction.CallbackContext context);
+            void OnWalking(InputAction.CallbackContext context);
+            void OnAim(InputAction.CallbackContext context);
         }
     }
 }

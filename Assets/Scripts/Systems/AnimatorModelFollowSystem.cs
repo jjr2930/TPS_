@@ -11,7 +11,7 @@ using static UnityEngine.EventSystems.EventTrigger;
 
 namespace MyTPS
 {
-    public partial struct AnimatorModelFollowSystem : ISystem
+    public partial struct PlayerAnimatorModelFollowSystem : ISystem
     { 
 
         public void OnUpdate(ref SystemState state)
@@ -41,7 +41,8 @@ namespace MyTPS
             //animatorTransformAccessors.Dispose();
             //parentPositions.Dispose();
 
-            var animatorQuery = SystemAPI.QueryBuilder().WithAll<LocalToWorld, AnimatorModelInstanceData>().Build();
+
+            var animatorQuery = SystemAPI.QueryBuilder().WithAll<LocalToWorld, AnimatorModelInstanceData, PlayerCombatMode>().Build();
             var entities = animatorQuery.ToEntityArray(Allocator.Temp);
             {
                 for (int i = 0; i < entities.Length; i++)
@@ -49,7 +50,17 @@ namespace MyTPS
                     var entity = entities[i];
                     var localToWorld = state.EntityManager.GetComponentData<LocalToWorld>(entity);
                     var animatorInstance = state.EntityManager.GetComponentObject<AnimatorModelInstanceData>(entity);
-                    animatorInstance.instance.transform.SetPositionAndRotation(localToWorld.Position, localToWorld.Rotation);
+                    var combatMode = state.EntityManager.GetComponentData<PlayerCombatMode>(entity);
+                    var isCombatMode = combatMode.isCombatMode;
+                    var instanceTransform = animatorInstance.instance.transform;
+                    if (isCombatMode)
+                    {
+                        instanceTransform.position = localToWorld.Position;
+                    }
+                    else
+                    {
+                        instanceTransform.SetPositionAndRotation(localToWorld.Position, localToWorld.Rotation);
+                    }
                 }
             }
             entities.Dispose();

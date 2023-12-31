@@ -10,6 +10,8 @@ public struct ThirdPersonCharacterComponent : IComponentData
 {
     public float RotationSharpness;
     public float GroundMaxSpeed;
+    public float walkingMaxSpeed;
+    public float runningMaxSpeed;
     public float GroundedMovementSharpness;
     public float AirAcceleration;
     public float AirMaxSpeed;

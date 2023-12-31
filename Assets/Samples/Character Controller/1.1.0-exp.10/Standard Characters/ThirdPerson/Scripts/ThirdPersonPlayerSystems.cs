@@ -7,6 +7,8 @@ using Unity.Transforms;
 using UnityEngine;
 using Unity.CharacterController;
 using MyTPS;
+using UnityEditor.Build.Pipeline;
+using System.Drawing.Drawing2D;
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 public partial class ThirdPersonPlayerInputsSystem : SystemBase
@@ -38,6 +40,7 @@ public partial class ThirdPersonPlayerInputsSystem : SystemBase
             lookingInput.y *= gameConfigs.inverseLookVertical ? -1f : 1f;
             lookingInput *= gameConfigs.mouseSensitive;
 
+            playerInputs.ValueRW.walkingPressed = myInput.HumanAction.Walking.IsPressed();            
             playerInputs.ValueRW.MoveInput = myInput.HumanAction.Movement.ReadValue<Vector2>();
             playerInputs.ValueRW.CameraLookInput = lookingInput;
             playerInputs.ValueRW.CameraZoomInput = myInput.HumanAction.CameraZoom.ReadValue<float>();
@@ -45,6 +48,11 @@ public partial class ThirdPersonPlayerInputsSystem : SystemBase
             if (myInput.HumanAction.Jump.IsPressed())
             {
                 playerInputs.ValueRW.JumpPressed.Set(tick);
+            }
+
+            if (myInput.HumanAction.Aim.IsPressed())
+            {
+                playerInputs.ValueRW.aimPressed.Set(tick);
             }
         }
     }
@@ -88,6 +96,7 @@ public partial struct ThirdPersonPlayerVariableStepControlSystem : ISystem
 /// It is necessary to handle this as part of the fixed step group, in case your framerate is lower than the fixed step rate.
 /// </summary>
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup), OrderFirst = true)]
+[UpdateAfter(typeof(AnimatorModelSpawnSystem))]
 [BurstCompile]
 public partial struct ThirdPersonPlayerFixedStepControlSystem : ISystem
 {
@@ -98,7 +107,7 @@ public partial struct ThirdPersonPlayerFixedStepControlSystem : ISystem
         state.RequireForUpdate(SystemAPI.QueryBuilder().WithAll<ThirdPersonPlayer, ThirdPersonPlayerInputs>().Build());
     }
     
-    [BurstCompile]
+    //[BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         uint tick = SystemAPI.GetSingleton<FixedTickSystem.Singleton>().Tick;
@@ -108,6 +117,16 @@ public partial struct ThirdPersonPlayerFixedStepControlSystem : ISystem
             if (SystemAPI.HasComponent<ThirdPersonCharacterControl>(player.ControlledCharacter))
             {
                 ThirdPersonCharacterControl characterControl = SystemAPI.GetComponent<ThirdPersonCharacterControl>(player.ControlledCharacter);
+                ThirdPersonCharacterComponent characterComponent = SystemAPI.GetComponent<ThirdPersonCharacterComponent>(player.ControlledCharacter);
+                if (state.EntityManager.HasComponent<AnimatorModelInstanceData>(player.ControlledCharacter))
+                {
+                    var animatorInstance = state.EntityManager.GetComponentObject<AnimatorModelInstanceData>(player.ControlledCharacter);
+                    var animatorEventListener = animatorInstance.instance.GetComponent<AnimatorEventListener>();    
+                    
+                    // Jump
+                    characterControl.Jump = animatorEventListener.jump;
+                    animatorEventListener.jump = false;
+                }
 
                 float3 characterUp = MathUtilities.GetUpFromRotation(SystemAPI.GetComponent<LocalTransform>(player.ControlledCharacter).Rotation);
                 
@@ -128,10 +147,18 @@ public partial struct ThirdPersonPlayerFixedStepControlSystem : ISystem
                 characterControl.MoveVector = (playerInputs.MoveInput.y * cameraForwardOnUpPlane) + (playerInputs.MoveInput.x * cameraRight);
                 characterControl.MoveVector = MathUtilities.ClampToMaxLength(characterControl.MoveVector, 1f);
 
-                // Jump
-                characterControl.Jump = playerInputs.JumpPressed.IsSet(tick);
+                //Debug.Log("walking pressed : " + playerInputs.walkingPressed);
+                if(playerInputs.walkingPressed)
+                {
+                    characterComponent.GroundMaxSpeed = characterComponent.walkingMaxSpeed;
+                }
+                else
+                {
+                    characterComponent.GroundMaxSpeed = characterComponent.runningMaxSpeed;
+                }
 
                 SystemAPI.SetComponent(player.ControlledCharacter, characterControl);
+                SystemAPI.SetComponent(player.ControlledCharacter, characterComponent);
             }
         }
     }
