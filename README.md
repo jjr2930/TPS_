@@ -5,6 +5,7 @@ TPS Practice for DOTS
 # 목표 구현
 - TPS 조종
 <br>https://youtu.be/-BEkACH80F8
+<br>https://youtu.be/nX53STKZkeo
   
 - Enities의 Streaming 로딩을 이용한 빠른 로딩 구현
 - 인벤토리
