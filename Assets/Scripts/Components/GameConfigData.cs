@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace MyTPS
@@ -12,5 +13,8 @@ namespace MyTPS
         public float mouseSensitive;
         public float movementInputThreshold;
         public float lookInputThreshold;
+
+        //aim options
+        public float aimDistance;
     }
 }

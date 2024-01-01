@@ -43,7 +43,7 @@ namespace MyTPS
         [SerializeField] float aimDistance;
         [SerializeField] Vector3 aimOffset = new Vector3(1f, 1f, -1f);
         [SerializeField] float theta = 0f;
-        [SerializeField] float pi = 0f;
+        [SerializeField] float phi = 0f;
 
         [Header("Input")]
         [SerializeField] PlayerInput playerInput;
@@ -133,17 +133,13 @@ namespace MyTPS
 
                         lookTargetPosition = lookTarget.position;
 
-                        pi += lookingInput.x ;
-                        pi = Mathf.Clamp(pi, 0f, 360f);
+                        phi += lookingInput.x ;
+                        phi = (phi > 360f) ? 0f : phi;
 
                         theta += lookingInput.y;
                         theta = Mathf.Clamp(theta, thetaMin, thetaMax);
 
-                        Vector3 spherePosition = new Vector3(
-                            noneDistance * Mathf.Sin(theta) * Mathf.Sin(pi),
-                            noneDistance * Mathf.Cos(theta),
-                            -noneDistance * Mathf.Sin(theta) * Mathf.Cos(pi)
-                        );
+                        Vector3 spherePosition = MathUtility.GetSphericalCoordinatesPosition(noneDistance, theta * Mathf.Deg2Rad, phi * Mathf.Deg2Rad);
 
                         nextCameraPosition = transform.position + spherePosition;
                     }
@@ -166,19 +162,7 @@ namespace MyTPS
                 default:
                     break;
             }
-            //calculate spherical coordinates system
-            //wikipidia
-            //x = rsin(theta)cos(pi);
-            //y = rsin(theta)sin(pi);
-            //z = rcos(theta);
-            //convert to unity coordinate system
-            //y => x, z => y x => -z
-            //so..
-            //-z = rsin(theta)cos(pi);
-            //x = rsin(theta)sin(pi);
-            //y = rcos(theta);
-
-            //sin , cos save? to dictionary?
+ 
 
 
             relativeOffset += transform.right * selectedOffset.x;

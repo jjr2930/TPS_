@@ -12,6 +12,7 @@ namespace MyTPS
         public float mouseSensitive = 1f;
         public float lookInputThreshold = 1f;
         public float movementInputThreshold = 1f;
+        public float aimDistance = 1000f;
     }
 
     public class GameConfigBaker : Baker<GameConfigAuthoring>
@@ -25,7 +26,7 @@ namespace MyTPS
                 inverseLookVertical = authoring.inverseLookVertical,
                 mouseSensitive = authoring.mouseSensitive,
                 lookInputThreshold = authoring.lookInputThreshold,
-                movementInputThreshold = authoring.movementInputThreshold
+                movementInputThreshold = authoring.movementInputThreshold,
             });
         }
     }
