@@ -4,6 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
+using Unity.CharacterController;
 
 namespace MyTPS
 {
@@ -31,12 +32,6 @@ namespace MyTPS
 
                     case CameraMode.Aim:
                         {
-                            var rotateSpeed = characterController.ValueRO.rotationSpeed;
-                            localTransform.ValueRW = localTransform.ValueRO.RotateY(math.radians(lookingInput.x * rotateSpeed * deltaTime));
-                            
-                            //localTransform.ValueRW.Position += localTransform.ValueRO.Forward() *  lookingInput.y * rotateSpeed * deltaTime;
-
-                            //Debug.DrawRay(localTransform.ValueRO.Position, localTransform.ValueRO.Forward() * 5f);
                         }
                         break;
                     default:

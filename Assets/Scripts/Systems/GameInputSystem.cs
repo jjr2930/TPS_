@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace MyTPS
@@ -31,12 +32,19 @@ namespace MyTPS
                 tpsCamera.ValueRW.aimPressed = aimPressed;
             }
 
-            foreach (var tpsCharacter in SystemAPI.Query<RefRW<CustomTPSCharacterController>>())
+            var humanAction = input.HumanAction;
+            uint tick = SystemAPI.GetSingleton<FixedTickSystem.Singleton>().Tick;
+            
+            foreach (var (playerInputs, player) in SystemAPI.Query<RefRW<BasicPlayerInputs>, BasicPlayer>())
             {
-                tpsCharacter.ValueRW.lookingInput = lookingInput;
-                tpsCharacter.ValueRW.movingInput = movingInput;
-                tpsCharacter.ValueRW.walkingPressed = walkingPressed;
-                tpsCharacter.ValueRW.aimPressed = aimPressed;
+                playerInputs.ValueRW.MoveInput = Vector2.ClampMagnitude(humanAction.Movement.ReadValue<Vector2>(), 1f);
+                playerInputs.ValueRW.CameraLookInput = humanAction.Look.ReadValue<Vector2>();
+                playerInputs.ValueRW.CameraZoomInput = humanAction.CameraZoom.ReadValue<float>();
+
+                if (humanAction.Jump.WasPressedThisFrame())
+                {
+                    playerInputs.ValueRW.JumpPressed.Set(tick);
+                }
             }
         }
     }

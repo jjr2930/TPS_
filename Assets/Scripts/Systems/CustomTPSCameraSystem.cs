@@ -37,6 +37,7 @@ namespace MyTPS
                 var elevationMin = tpsCamera.ValueRO.elevationMin;
                 var elevationMax = tpsCamera.ValueRO.elevationMax;
                 tpsCamera.ValueRW.mode = tpsCamera.ValueRO.aimPressed ? CameraMode.Aim : CameraMode.Normal;
+
                 //calculate transform
                 switch (tpsCamera.ValueRO.mode)
                 {
