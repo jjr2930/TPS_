@@ -16,5 +16,7 @@ namespace MyTPS
 
         //aim options
         public float aimDistance;
+        public float aimYMultiplier;
+        public float aimXMultiplier;
     }
 }
