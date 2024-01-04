@@ -20,7 +20,6 @@ public partial struct BasicCharacterPhysicsUpdateSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        Debug.Log("BasicCharacterPhysicsUpdateSystem.OnCreate");
         _characterQuery = KinematicCharacterUtilities.GetBaseCharacterQueryBuilder()
             .WithAll<
                 BasicCharacterComponent,
@@ -43,7 +42,6 @@ public partial struct BasicCharacterPhysicsUpdateSystem : ISystem
     //[BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        Debug.Log("BasicCharacterPhysicsUpdateSystem.OnUpdate");
         _context.OnSystemUpdate(ref state);
         _baseContext.OnSystemUpdate(ref state, SystemAPI.Time, SystemAPI.GetSingleton<PhysicsWorldSingleton>());
 
@@ -53,7 +51,6 @@ public partial struct BasicCharacterPhysicsUpdateSystem : ISystem
             BaseContext = _baseContext,
         };
         job.ScheduleParallel();
-        Debug.Log("BasicCharacterPhysicsUpdateSystem.OnUpdate End");
     }
 
     //[BurstCompile]
@@ -64,7 +61,6 @@ public partial struct BasicCharacterPhysicsUpdateSystem : ISystem
     
         void Execute(BasicCharacterAspect characterAspect)
         {
-            Debug.Log("BasicCharacterAspect Execute");
             characterAspect.PhysicsUpdate(ref Context, ref BaseContext);
         }
 
@@ -93,7 +89,6 @@ public partial struct BasicCharacterVariableUpdateSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        Debug.Log("BasicCharacterVariableUpdateSystem.OnCreate");
         _characterQuery = KinematicCharacterUtilities.GetBaseCharacterQueryBuilder()
             .WithAll<
                 BasicCharacterComponent,
@@ -105,7 +100,7 @@ public partial struct BasicCharacterVariableUpdateSystem : ISystem
         _baseContext = new KinematicCharacterUpdateContext();
         _baseContext.OnSystemCreate(ref state);
         
-        //state.RequireForUpdate(_characterQuery);
+        state.RequireForUpdate(_characterQuery);
     }
 
     [BurstCompile]
@@ -115,7 +110,6 @@ public partial struct BasicCharacterVariableUpdateSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        Debug.Log("BasicCharacterVariableUpdateSystem.OnUpdate");
         _context.OnSystemUpdate(ref state);
         _baseContext.OnSystemUpdate(ref state, SystemAPI.Time, SystemAPI.GetSingleton<PhysicsWorldSingleton>());
         

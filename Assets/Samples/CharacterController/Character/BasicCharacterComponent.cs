@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using Unity.CharacterController;
 using Unity.Physics.Authoring;
+using MyTPS;
 
 [Serializable]
 public struct BasicCharacterComponent : IComponentData
@@ -21,7 +22,8 @@ public struct BasicCharacterComponent : IComponentData
     public bool PreventAirAccelerationAgainstUngroundedHits;
     public int MaxJumpsInAir;
     public BasicStepAndSlopeHandlingParameters StepAndSlopeHandling;
-    
+    public float rotationSpeed;
+
     [Header("Tags")]
     public CustomPhysicsBodyTags IgnoreCollisionsTag;
     public CustomPhysicsBodyTags IgnoreGroundingTag;
@@ -46,6 +48,7 @@ public struct BasicCharacterComponent : IComponentData
             Gravity = math.up() * -30f,
             PreventAirAccelerationAgainstUngroundedHits = true,
             MaxJumpsInAir = 0,
+            rotationSpeed = 90,
 
             StepAndSlopeHandling = BasicStepAndSlopeHandlingParameters.GetDefault(),
         };
@@ -57,4 +60,6 @@ public struct BasicCharacterControl : IComponentData
 {
     public float3 MoveVector;
     public bool Jump;
+    public CameraMode cameraMode;
+    public float2 lookingInput;
 }

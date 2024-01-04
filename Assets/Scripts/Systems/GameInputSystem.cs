@@ -40,7 +40,7 @@ namespace MyTPS
                 playerInputs.ValueRW.MoveInput = Vector2.ClampMagnitude(humanAction.Movement.ReadValue<Vector2>(), 1f);
                 playerInputs.ValueRW.CameraLookInput = humanAction.Look.ReadValue<Vector2>();
                 playerInputs.ValueRW.CameraZoomInput = humanAction.CameraZoom.ReadValue<float>();
-
+                playerInputs.ValueRW.aimPressed = humanAction.Aim.IsPressed();
                 if (humanAction.Jump.WasPressedThisFrame())
                 {
                     playerInputs.ValueRW.JumpPressed.Set(tick);

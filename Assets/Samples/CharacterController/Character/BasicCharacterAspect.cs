@@ -13,6 +13,7 @@ using Unity.Physics.Systems;
 using Unity.Transforms;
 using Unity.CharacterController;
 using UnityEngine;
+using MyTPS;
 
 public struct BasicCharacterUpdateContext
 {
@@ -38,7 +39,6 @@ public readonly partial struct BasicCharacterAspect : IAspect, IKinematicCharact
 
     public void PhysicsUpdate(ref BasicCharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext)
     {
-        Debug.Log("physcis update");
         ref BasicCharacterComponent characterComponent = ref CharacterComponent.ValueRW;
         ref KinematicCharacterBody characterBody = ref CharacterAspect.CharacterBody.ValueRW;
         ref float3 characterPosition = ref CharacterAspect.LocalTransform.ValueRW.Position;
@@ -129,11 +129,37 @@ public readonly partial struct BasicCharacterAspect : IAspect, IKinematicCharact
         // Add rotation from parent body to the character rotation
         // (this is for allowing a rotating moving platform to rotate your character as well, and handle interpolation properly)
         KinematicCharacterUtilities.AddVariableRateRotationFromFixedRateRotation(ref characterRotation, characterBody.RotationFromParent, baseContext.Time.DeltaTime, characterBody.LastPhysicsUpdateDeltaTime);
-        
-        // Rotate towards move direction
-        if (math.lengthsq(characterControl.MoveVector) > 0f)
+
+        switch (characterControl.cameraMode)
         {
-            CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, baseContext.Time.DeltaTime, math.normalizesafe(characterControl.MoveVector), MathUtilities.GetUpFromRotation(characterRotation), characterComponent.RotationSharpness);
+            case CameraMode.Aim:
+                {
+                    float eplilon = 0.0001f;
+                    if (math.abs( characterControl.lookingInput.x ) > eplilon)
+                    {
+                        var characterForward = MathUtilities.GetForwardFromRotation(characterRotation);
+                        var characterRight = MathUtilities.GetRightFromRotation(characterRotation);
+                        var characterUp = MathUtilities.GetUpFromRotation(characterRotation);
+                        var calculatedLookingX = characterControl.lookingInput.x * baseContext.Time.DeltaTime * characterComponent.rotationSpeed;
+                        var targetDirection = math.normalizesafe(characterForward + characterRight * calculatedLookingX);
+
+                        CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, baseContext.Time.DeltaTime, targetDirection, characterUp, characterComponent.RotationSharpness);
+                    }
+                }
+                break;
+
+            case CameraMode.Normal:
+                {
+                    // Rotate towards move direction
+                    if (math.lengthsq(characterControl.MoveVector) > 0f)
+                    {
+                        CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, baseContext.Time.DeltaTime, math.normalizesafe(characterControl.MoveVector), MathUtilities.GetUpFromRotation(characterRotation), characterComponent.RotationSharpness);
+                    }
+                }
+                break;
+
+            default:
+                break;
         }
     }
     

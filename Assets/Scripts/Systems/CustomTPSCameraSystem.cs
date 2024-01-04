@@ -36,6 +36,24 @@ namespace MyTPS
                 var rotateSpeed = tpsCamera.ValueRO.rotateSpeed;
                 var elevationMin = tpsCamera.ValueRO.elevationMin;
                 var elevationMax = tpsCamera.ValueRO.elevationMax;
+
+                var nextMode = tpsCamera.ValueRO.aimPressed ? CameraMode.Aim : CameraMode.Normal;
+                if(nextMode != tpsCamera.ValueRW.mode)
+                {
+                    switch (nextMode)
+                    {
+                        case CameraMode.Normal:
+                            break;
+
+                        case CameraMode.Aim:
+                            //Camera.main.transform.rotation = Quaternion.identity;
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                }
                 tpsCamera.ValueRW.mode = tpsCamera.ValueRO.aimPressed ? CameraMode.Aim : CameraMode.Normal;
 
                 //calculate transform
@@ -70,8 +88,11 @@ namespace MyTPS
                             var aimOffset = tpsCamera.ValueRO.aimOffset;
                             var relatedAimCameraPosition = aimOffset.x * targetRight + aimOffset.y * targetUp + aimOffset.z * targetForward;
                             var lookingPosition = targetWorldPosition + targetForward * 1000f;
+                            var cameraRight = Camera.main.transform.worldToLocalMatrix * Camera.main.transform.right;
+                            tpsCamera.ValueRW.aimXAngle += -lookingInput.y * deltaTime * tpsCamera.ValueRO.rotateSpeed;
                             Camera.main.transform.position = targetWorldPosition + relatedAimCameraPosition;
-                            Camera.main.transform.LookAt(lookingPosition, Vector3.up);
+                            Camera.main.transform.LookAt(lookingPosition);
+                            Camera.main.transform.Rotate(cameraRight, tpsCamera.ValueRO.aimXAngle, Space.Self);
                         }
                         break;
                     default:

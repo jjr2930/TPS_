@@ -19,7 +19,6 @@ namespace MyTPS
         public float polar;
         public float distance;
         public float rotateSpeed;
-        //x : radius, y : elevation, z : polar
         public float3 aimOffset;
         public CameraMode mode;
         public float elevationMin;
@@ -31,5 +30,6 @@ namespace MyTPS
         public float2 lookingInput;
         public float zoomValue;
         public bool aimPressed;
+        public float aimXAngle;
     }
 }

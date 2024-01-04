@@ -56,8 +56,8 @@ public partial struct BasicFixedStepPlayerControlSystem : ISystem
             if (SystemAPI.HasComponent<BasicCharacterControl>(player.ControlledCharacter))
             {
                 BasicCharacterControl characterControl = SystemAPI.GetComponent<BasicCharacterControl>(player.ControlledCharacter);
-
-                float3 characterUp = MathUtilities.GetUpFromRotation(SystemAPI.GetComponent<LocalTransform>(player.ControlledCharacter).Rotation);
+                var characterRotation = SystemAPI.GetComponent<LocalTransform>(player.ControlledCharacter).Rotation;
+                float3 characterUp = MathUtilities.GetUpFromRotation(characterRotation);
                 
                 // Get camera rotation, since our movement is relative to it.
                 quaternion cameraRotation = quaternion.identity;
@@ -68,13 +68,36 @@ public partial struct BasicFixedStepPlayerControlSystem : ISystem
                     // If not using netcode prediction, we could simply get rotation from transform here instead.
                     LocalToWorld cameraLocalToWorld = SystemAPI.GetComponent<LocalToWorld>(player.ControlledCamera);
                     cameraRotation = cameraLocalToWorld.Rotation;
-                }
-                float3 cameraForwardOnUpPlane = math.normalizesafe(MathUtilities.ProjectOnPlane(MathUtilities.GetForwardFromRotation(cameraRotation), characterUp));
-                float3 cameraRight = MathUtilities.GetRightFromRotation(cameraRotation);
 
-                // Move
-                characterControl.MoveVector = (playerInputs.ValueRW.MoveInput.y * cameraForwardOnUpPlane) + (playerInputs.ValueRW.MoveInput.x * cameraRight);
-                characterControl.MoveVector = MathUtilities.ClampToMaxLength(characterControl.MoveVector, 1f);
+                    characterControl.cameraMode = playerInputs.ValueRO.aimPressed ? CameraMode.Aim : CameraMode.Normal;
+                    switch (characterControl.cameraMode)
+                    {
+                        case CameraMode.Normal:
+                            {
+                                float3 cameraForwardOnUpPlane = math.normalizesafe(MathUtilities.ProjectOnPlane(MathUtilities.GetForwardFromRotation(cameraRotation), characterUp));
+                                float3 cameraRight = MathUtilities.GetRightFromRotation(cameraRotation);
+
+                                // Move
+                                characterControl.MoveVector = (playerInputs.ValueRW.MoveInput.y * cameraForwardOnUpPlane) + (playerInputs.ValueRW.MoveInput.x * cameraRight);
+                                characterControl.MoveVector = MathUtilities.ClampToMaxLength(characterControl.MoveVector, 1f);
+                            }
+                            break;
+
+                        case CameraMode.Aim:
+                            {
+                                float3 characterForwardOnUpPlane = math.normalizesafe(MathUtilities.ProjectOnPlane(MathUtilities.GetForwardFromRotation(characterRotation), characterUp));
+                                float3 characterRight = MathUtilities.GetRightFromRotation(characterRotation);
+
+                                characterControl.MoveVector = (playerInputs.ValueRW.MoveInput.y * characterForwardOnUpPlane) + (playerInputs.ValueRW.MoveInput.x * characterRight);
+                                characterControl.MoveVector = MathUtilities.ClampToMaxLength(characterControl.MoveVector, 1f);
+                                characterControl.lookingInput = playerInputs.ValueRO.CameraLookInput;
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
 
                 // Jump
                 // We detect a jump event if the jump counter has changed since the last fixed update.
