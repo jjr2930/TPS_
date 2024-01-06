@@ -14,7 +14,8 @@ namespace MyTPS
 
     public struct CustomTPSCamera : IComponentData
     {
-        //none mdoe
+        //normal mdoe
+        public float3 normalOffset;
         public float elevation;
         public float polar;
         public float distance;

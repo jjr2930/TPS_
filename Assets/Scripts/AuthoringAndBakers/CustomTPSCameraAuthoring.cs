@@ -8,6 +8,7 @@ namespace MyTPS
     {
         public GameObject target;
         [Tooltip("offset")]
+        public Vector3 normalOffset;
         public Vector3 aimPositionValue;
         public float rotateSpeed;
         public float elevationMin;
@@ -18,6 +19,10 @@ namespace MyTPS
 
         public void OnDrawGizmos()
         {
+            if (null == target)
+            {
+                return;
+            }
             Gizmos.color = new Color(0f, 1f, 0f, 0.5f);
             Gizmos.DrawSphere(target.transform.position, distance);
         }
@@ -45,7 +50,8 @@ namespace MyTPS
                     elevationMax = authoring.elevationMax,
                     zoomMinMax = authoring.zoomMinMax,
                     distance = authoring.distance,
-                    polar = authoring.startPolar
+                    polar = authoring.startPolar,
+                    normalOffset = authoring.normalOffset
                 });
 
                 AddComponent(entity, new CustomTPSCameraTarget()

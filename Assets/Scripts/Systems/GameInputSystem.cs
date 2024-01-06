@@ -43,6 +43,7 @@ namespace MyTPS
                 playerInputs.ValueRW.aimPressed = humanAction.Aim.IsPressed();
                 if (humanAction.Jump.WasPressedThisFrame())
                 {
+                    Debug.Log("jump pressed this frame");
                     playerInputs.ValueRW.JumpPressed.Set(tick);
                 }
             }

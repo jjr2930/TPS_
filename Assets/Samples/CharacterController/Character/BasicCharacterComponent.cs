@@ -62,4 +62,5 @@ public struct BasicCharacterControl : IComponentData
     public bool Jump;
     public CameraMode cameraMode;
     public float2 lookingInput;
+    public float3 cameraPlanarForward;
 }

@@ -1,16 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Physics;
-using Unity.Physics.Authoring;
-using Unity.Physics.Extensions;
-using Unity.Physics.Systems;
-using Unity.Transforms;
 using Unity.CharacterController;
 using UnityEngine;
 using MyTPS;
@@ -129,7 +120,6 @@ public readonly partial struct BasicCharacterAspect : IAspect, IKinematicCharact
         // Add rotation from parent body to the character rotation
         // (this is for allowing a rotating moving platform to rotate your character as well, and handle interpolation properly)
         KinematicCharacterUtilities.AddVariableRateRotationFromFixedRateRotation(ref characterRotation, characterBody.RotationFromParent, baseContext.Time.DeltaTime, characterBody.LastPhysicsUpdateDeltaTime);
-
         switch (characterControl.cameraMode)
         {
             case CameraMode.Aim:
@@ -141,9 +131,11 @@ public readonly partial struct BasicCharacterAspect : IAspect, IKinematicCharact
                         var characterRight = MathUtilities.GetRightFromRotation(characterRotation);
                         var characterUp = MathUtilities.GetUpFromRotation(characterRotation);
                         var calculatedLookingX = characterControl.lookingInput.x * baseContext.Time.DeltaTime * characterComponent.rotationSpeed;
-                        var targetDirection = math.normalizesafe(characterForward + characterRight * calculatedLookingX);
+                        //var calculatedLookingX = characterControl.lookingInput.x * baseContext.Time.DeltaTime;
+                        //var calculatedLookingX = characterControl.lookingInput.x;
+                        //var targetDirection = math.normalizesafe(characterForward + characterRight * calculatedLookingX);
 
-                        CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, baseContext.Time.DeltaTime, targetDirection, characterUp, characterComponent.RotationSharpness);
+                        CharacterControlUtilities.SlerpRotationTowardsDirectionAroundUp(ref characterRotation, baseContext.Time.DeltaTime , characterControl.cameraPlanarForward, characterUp, characterComponent.RotationSharpness);
                     }
                 }
                 break;

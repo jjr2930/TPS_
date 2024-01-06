@@ -11,12 +11,25 @@ using Unity.Physics.Authoring;
 using Unity.Transforms;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Analytics;
 
 namespace MyTPS
 {
+    [UpdateInGroup(typeof(LateSimulationSystemGroup))]  
     [UpdateAfter(typeof(GameInputSystem))]
     public partial class CustomTPSCameraSystem : SystemBase
     {
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+
+
+            var cameraQuery = SystemAPI.QueryBuilder()
+                .WithAll<CustomTPSCamera, CustomTPSCameraTarget>().Build();
+            
+            base.RequireForUpdate(cameraQuery);
+            base.RequireForUpdate<GameConfigData>();
+        }
         protected override void OnUpdate()
         {
             var cameraQuery = SystemAPI.QueryBuilder()
@@ -24,6 +37,7 @@ namespace MyTPS
 
             var cameraEntities = cameraQuery.ToEntityArray(Allocator.Temp);
             var deltaTime = SystemAPI.Time.DeltaTime;
+            var configs = SystemAPI.GetSingleton<GameConfigData>();
 
             foreach (var cameraEntity in cameraEntities)
             {
@@ -36,68 +50,90 @@ namespace MyTPS
                 var rotateSpeed = tpsCamera.ValueRO.rotateSpeed;
                 var elevationMin = tpsCamera.ValueRO.elevationMin;
                 var elevationMax = tpsCamera.ValueRO.elevationMax;
+                var normalOffset = tpsCamera.ValueRO.normalOffset;
 
-                var nextMode = tpsCamera.ValueRO.aimPressed ? CameraMode.Aim : CameraMode.Normal;
-                if(nextMode != tpsCamera.ValueRW.mode)
-                {
-                    switch (nextMode)
-                    {
-                        case CameraMode.Normal:
-                            break;
-
-                        case CameraMode.Aim:
-                            //Camera.main.transform.rotation = Quaternion.identity;
-                            break;
-
-                        default:
-                            break;
-                    }
-
-                }
                 tpsCamera.ValueRW.mode = tpsCamera.ValueRO.aimPressed ? CameraMode.Aim : CameraMode.Normal;
 
+                tpsCamera.ValueRW.distance += tpsCamera.ValueRO.zoomValue;
+                tpsCamera.ValueRW.polar += lookingInput.x * rotateSpeed * deltaTime;
+                tpsCamera.ValueRW.elevation += -lookingInput.y * rotateSpeed * deltaTime;
+
+                tpsCamera.ValueRW.elevation = math.clamp(tpsCamera.ValueRW.elevation, elevationMin, elevationMax);
+                tpsCamera.ValueRW.polar = (tpsCamera.ValueRW.polar % 360f);
+
+                //var radius = tpsCamera.ValueRO.distance;
+                var radius = tpsCamera.ValueRO.mode == CameraMode.Aim ? 3f : 5f;
+                var elevation = math.radians(tpsCamera.ValueRO.elevation);
+                var polar = math.radians(tpsCamera.ValueRO.polar);
+                var spherePosition = MathUtility.GetSphericalCoordinatesPosition(radius, elevation, polar);
+                var cameraPlanarRotation = MathUtilities.CreateRotationWithUpPriority(math.up(), Camera.main.transform.forward);
+                var relativeOffset = float3.zero;
+                var nextPosition = targetWorldPosition + spherePosition;
+
+                var cameraPlanarForward = MathUtilities.GetForwardFromRotation(cameraPlanarRotation);
+                var cameraPlanarRight = MathUtilities.GetRightFromRotation(cameraPlanarRotation);
+                var cameraPlanarUp = MathUtilities.GetUpFromRotation(cameraPlanarRotation);
+
+                relativeOffset += cameraPlanarForward * normalOffset.z;
+                relativeOffset += cameraPlanarRight * normalOffset.x;
+                relativeOffset += cameraPlanarUp * normalOffset.y;
+
+                Camera.main.transform.position = nextPosition;
+                Camera.main.transform.LookAt(targetWorldPosition + relativeOffset, Vector3.up);
+
                 //calculate transform
-                switch (tpsCamera.ValueRO.mode)
-                {
-                    case CameraMode.Normal:
-                        {
-                            //calculate input..
-                            tpsCamera.ValueRW.distance  += tpsCamera.ValueRO.zoomValue;
-                            tpsCamera.ValueRW.polar     += lookingInput.x * rotateSpeed * deltaTime;
-                            tpsCamera.ValueRW.elevation += -lookingInput.y * rotateSpeed * deltaTime;
+                //switch (tpsCamera.ValueRO.mode)
+                //{
+                //    case CameraMode.Normal:
+                //        {
+                //            //calculate input..
+                //            tpsCamera.ValueRW.distance  += tpsCamera.ValueRO.zoomValue;
+                //            tpsCamera.ValueRW.polar     += lookingInput.x * rotateSpeed * deltaTime;
+                //            tpsCamera.ValueRW.elevation += -lookingInput.y * rotateSpeed * deltaTime;
 
-                            tpsCamera.ValueRW.elevation = math.clamp(tpsCamera.ValueRW.elevation, elevationMin, elevationMax);
-                            tpsCamera.ValueRW.polar     = (tpsCamera.ValueRW.polar % 360f);
+                //            tpsCamera.ValueRW.elevation = math.clamp(tpsCamera.ValueRW.elevation, elevationMin, elevationMax);
+                //            tpsCamera.ValueRW.polar     = (tpsCamera.ValueRW.polar % 360f);
 
-                            var radius          = tpsCamera.ValueRO.distance;
-                            var elevation       = math.radians(tpsCamera.ValueRO.elevation);
-                            var polar           = math.radians(tpsCamera.ValueRO.polar);
-                            var spherePosition  = MathUtility.GetSphericalCoordinatesPosition(radius, elevation, polar);
-                            var nextPosition    = targetWorldPosition + spherePosition;
+                //            var radius                  = tpsCamera.ValueRO.distance;
+                //            var elevation               = math.radians(tpsCamera.ValueRO.elevation);
+                //            var polar                   = math.radians(tpsCamera.ValueRO.polar);
+                //            var spherePosition          = MathUtility.GetSphericalCoordinatesPosition(radius, elevation, polar);
+                //            var cameraPlanarRotation    = MathUtilities.CreateRotationWithUpPriority(math.up(), Camera.main.transform.forward);
+                //            var relativeOffset          = float3.zero;
+                //            var nextPosition            = targetWorldPosition + spherePosition;
 
-                            Camera.main.transform.position = nextPosition;
-                            Camera.main.transform.LookAt(targetWorldPosition, Vector3.up);
-                        }
-                        break;
-                    case CameraMode.Aim:
-                        {
-                            var targetForward = targetLocalToWorld.ValueRO.Forward;
-                            var targetRight = targetLocalToWorld.ValueRO.Right;
-                            var targetUp = targetLocalToWorld.ValueRO.Up;
+                //            var cameraPlanarForward = MathUtilities.GetForwardFromRotation(cameraPlanarRotation);
+                //            var cameraPlanarRight = MathUtilities.GetRightFromRotation(cameraPlanarRotation);
+                //            var cameraPlanarUp = MathUtilities.GetUpFromRotation(cameraPlanarRotation);
 
-                            var aimOffset = tpsCamera.ValueRO.aimOffset;
-                            var relatedAimCameraPosition = aimOffset.x * targetRight + aimOffset.y * targetUp + aimOffset.z * targetForward;
-                            var lookingPosition = targetWorldPosition + targetForward * 1000f;
-                            var cameraRight = Camera.main.transform.worldToLocalMatrix * Camera.main.transform.right;
-                            tpsCamera.ValueRW.aimXAngle += -lookingInput.y * deltaTime * tpsCamera.ValueRO.rotateSpeed;
-                            Camera.main.transform.position = targetWorldPosition + relatedAimCameraPosition;
-                            Camera.main.transform.LookAt(lookingPosition);
-                            Camera.main.transform.Rotate(cameraRight, tpsCamera.ValueRO.aimXAngle, Space.Self);
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                //            relativeOffset += cameraPlanarForward * normalOffset.z;
+                //            relativeOffset += cameraPlanarRight * normalOffset.x;
+                //            relativeOffset += cameraPlanarUp * normalOffset.y;
+
+                //            Camera.main.transform.position = nextPosition;
+                //            Camera.main.transform.LookAt(targetWorldPosition + relativeOffset, Vector3.up);
+                //        }
+                //        break;
+                //    case CameraMode.Aim:
+                //        {
+                //            var targetForward = targetLocalToWorld.ValueRO.Forward;
+                //            var targetRight = targetLocalToWorld.ValueRO.Right;
+                //            var targetUp = targetLocalToWorld.ValueRO.Up;
+
+                //            var aimOffset = tpsCamera.ValueRO.aimOffset;
+                //            var relatedAimCameraPosition = aimOffset.x * targetRight + aimOffset.y * targetUp + aimOffset.z * targetForward;
+                //            var lookingPosition = targetWorldPosition + targetForward * 1000f;
+                //            var cameraRight = Camera.main.transform.worldToLocalMatrix * Camera.main.transform.right;
+                //            tpsCamera.ValueRW.aimXAngle += -lookingInput.y * deltaTime * tpsCamera.ValueRO.rotateSpeed * configs.aimYMultiplier;
+
+                //            Camera.main.transform.position = targetWorldPosition + relatedAimCameraPosition;
+                //            Camera.main.transform.LookAt(lookingPosition);
+                //            Camera.main.transform.Rotate(cameraRight, tpsCamera.ValueRO.aimXAngle, Space.Self);
+                //        }
+                //        break;
+                //    default:
+                //        break;
+                //}
             }
         }
     }

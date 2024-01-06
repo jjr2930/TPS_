@@ -16,5 +16,10 @@ namespace MyTPS
         {
             jump = false;
         }
+
+        public void ChangeAimMode()
+        {
+
+        }
     }
 }

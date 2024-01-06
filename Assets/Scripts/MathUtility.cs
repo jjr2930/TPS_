@@ -14,7 +14,7 @@ namespace MyTPS
                 : from + math.sign(to - from) * maxDelta;
         }
 
-        public static float3 GetSphericalCoordinatesPosition(float radius, float elevation, float polar)
+        public static float3 GetSphericalCoordinatesPosition(float radius, float elevation, float polar)    
         {
             //calculate spherical coordinates system
             //wikipidia

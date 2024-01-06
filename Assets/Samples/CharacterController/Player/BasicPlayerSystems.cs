@@ -49,6 +49,8 @@ public partial struct BasicFixedStepPlayerControlSystem : ISystem
 
     public void OnUpdate(ref SystemState state)
     {
+        var gameConfigs = SystemAPI.GetSingleton<GameConfigData>();
+
         uint tick = SystemAPI.GetSingleton<FixedTickSystem.Singleton>().Tick;
         
         foreach (var (playerInputs, player) in SystemAPI.Query<RefRW<BasicPlayerInputs>, BasicPlayer>().WithAll<Simulate>())
@@ -58,16 +60,14 @@ public partial struct BasicFixedStepPlayerControlSystem : ISystem
                 BasicCharacterControl characterControl = SystemAPI.GetComponent<BasicCharacterControl>(player.ControlledCharacter);
                 var characterRotation = SystemAPI.GetComponent<LocalTransform>(player.ControlledCharacter).Rotation;
                 float3 characterUp = MathUtilities.GetUpFromRotation(characterRotation);
-                
+
                 // Get camera rotation, since our movement is relative to it.
-                quaternion cameraRotation = quaternion.identity;
+                quaternion cameraRotation = Camera.main.transform.rotation;
                 if (SystemAPI.HasComponent<LocalToWorld>(player.ControlledCamera))
                 {
                     // Camera rotation is calculated rather than gotten from transform, because this allows us to 
                     // reduce the size of the camera ghost state in a netcode prediction context.
                     // If not using netcode prediction, we could simply get rotation from transform here instead.
-                    LocalToWorld cameraLocalToWorld = SystemAPI.GetComponent<LocalToWorld>(player.ControlledCamera);
-                    cameraRotation = cameraLocalToWorld.Rotation;
 
                     characterControl.cameraMode = playerInputs.ValueRO.aimPressed ? CameraMode.Aim : CameraMode.Normal;
                     switch (characterControl.cameraMode)
@@ -91,6 +91,9 @@ public partial struct BasicFixedStepPlayerControlSystem : ISystem
                                 characterControl.MoveVector = (playerInputs.ValueRW.MoveInput.y * characterForwardOnUpPlane) + (playerInputs.ValueRW.MoveInput.x * characterRight);
                                 characterControl.MoveVector = MathUtilities.ClampToMaxLength(characterControl.MoveVector, 1f);
                                 characterControl.lookingInput = playerInputs.ValueRO.CameraLookInput;
+
+                                float3 cameraForwardOnUpPlane = math.normalizesafe(MathUtilities.ProjectOnPlane(MathUtilities.GetForwardFromRotation(cameraRotation), characterUp));
+                                characterControl.cameraPlanarForward = cameraForwardOnUpPlane;
                             }
                             break;
 

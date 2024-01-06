@@ -82,6 +82,15 @@ namespace MyTPS
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Fire"",
+                    ""type"": ""Button"",
+                    ""id"": ""19b6e818-4b6b-4393-b901-95135d87ab8d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -216,6 +225,17 @@ namespace MyTPS
                     ""action"": ""Aim"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fc3d7335-e624-4eb1-a984-0d711c76f503"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Fire"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -230,6 +250,7 @@ namespace MyTPS
             m_HumanAction_CameraZoom = m_HumanAction.FindAction("CameraZoom", throwIfNotFound: true);
             m_HumanAction_Walking = m_HumanAction.FindAction("Walking", throwIfNotFound: true);
             m_HumanAction_Aim = m_HumanAction.FindAction("Aim", throwIfNotFound: true);
+            m_HumanAction_Fire = m_HumanAction.FindAction("Fire", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -297,6 +318,7 @@ namespace MyTPS
         private readonly InputAction m_HumanAction_CameraZoom;
         private readonly InputAction m_HumanAction_Walking;
         private readonly InputAction m_HumanAction_Aim;
+        private readonly InputAction m_HumanAction_Fire;
         public struct HumanActionActions
         {
             private @MyTPSInput m_Wrapper;
@@ -307,6 +329,7 @@ namespace MyTPS
             public InputAction @CameraZoom => m_Wrapper.m_HumanAction_CameraZoom;
             public InputAction @Walking => m_Wrapper.m_HumanAction_Walking;
             public InputAction @Aim => m_Wrapper.m_HumanAction_Aim;
+            public InputAction @Fire => m_Wrapper.m_HumanAction_Fire;
             public InputActionMap Get() { return m_Wrapper.m_HumanAction; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -334,6 +357,9 @@ namespace MyTPS
                 @Aim.started += instance.OnAim;
                 @Aim.performed += instance.OnAim;
                 @Aim.canceled += instance.OnAim;
+                @Fire.started += instance.OnFire;
+                @Fire.performed += instance.OnFire;
+                @Fire.canceled += instance.OnFire;
             }
 
             private void UnregisterCallbacks(IHumanActionActions instance)
@@ -356,6 +382,9 @@ namespace MyTPS
                 @Aim.started -= instance.OnAim;
                 @Aim.performed -= instance.OnAim;
                 @Aim.canceled -= instance.OnAim;
+                @Fire.started -= instance.OnFire;
+                @Fire.performed -= instance.OnFire;
+                @Fire.canceled -= instance.OnFire;
             }
 
             public void RemoveCallbacks(IHumanActionActions instance)
@@ -381,6 +410,7 @@ namespace MyTPS
             void OnCameraZoom(InputAction.CallbackContext context);
             void OnWalking(InputAction.CallbackContext context);
             void OnAim(InputAction.CallbackContext context);
+            void OnFire(InputAction.CallbackContext context);
         }
     }
 }
