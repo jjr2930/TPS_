@@ -1,12 +1,9 @@
-using NUnit.Framework;
-using System.Collections;
-using System.Collections.Generic;
-using System.Xml.Schema;
 using Unity.CharacterController;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace MyTPS
 {

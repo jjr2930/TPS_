@@ -15,8 +15,14 @@ using UnityEngine.Analytics;
 
 namespace MyTPS
 {
-    [UpdateInGroup(typeof(LateSimulationSystemGroup))]  
-    [UpdateAfter(typeof(GameInputSystem))]
+    //[UpdateInGroup(typeof(SimulationSystemGroup))]
+    //[UpdateAfter(typeof(FixedStepSimulationSystemGroup))]
+    //[UpdateAfter(typeof(BasicPlayerVariableStepControlSystem))]
+    //[UpdateAfter(typeof(BasicCharacterVariableUpdateSystem))]
+    //[UpdateBefore(typeof(TransformSystemGroup))]
+    [UpdateInGroup(typeof(LateSimulationSystemGroup))]
+    [UpdateAfter(typeof(PlayerAnimatorModelFollowSystem))]
+
     public partial class CustomTPSCameraSystem : SystemBase
     {
         protected override void OnCreate()
@@ -42,6 +48,8 @@ namespace MyTPS
             foreach (var cameraEntity in cameraEntities)
             {
                 var tpsCamera = SystemAPI.GetComponentRW<CustomTPSCamera>(cameraEntity);
+                var tpsCameraLocal = SystemAPI.GetComponentRW<LocalTransform>(cameraEntity);
+                var tpsCameraWorld = SystemAPI.GetComponentRW<LocalToWorld>(cameraEntity);
                 var tpsCameraTarget = SystemAPI.GetComponentRO<CustomTPSCameraTarget>(cameraEntity);
                 var targetEntity = tpsCameraTarget.ValueRO.target;
                 var targetLocalToWorld = SystemAPI.GetComponentRW<LocalToWorld>(targetEntity);
@@ -78,62 +86,15 @@ namespace MyTPS
                 relativeOffset += cameraPlanarRight * normalOffset.x;
                 relativeOffset += cameraPlanarUp * normalOffset.y;
 
+                var lookPosition = targetWorldPosition + relativeOffset;
+                var camToLook = lookPosition - tpsCameraWorld.ValueRO.Position;
+                var lookRotation = quaternion.LookRotationSafe(camToLook, math.up());
+
                 Camera.main.transform.position = nextPosition;
                 Camera.main.transform.LookAt(targetWorldPosition + relativeOffset, Vector3.up);
-
-                //calculate transform
-                //switch (tpsCamera.ValueRO.mode)
-                //{
-                //    case CameraMode.Normal:
-                //        {
-                //            //calculate input..
-                //            tpsCamera.ValueRW.distance  += tpsCamera.ValueRO.zoomValue;
-                //            tpsCamera.ValueRW.polar     += lookingInput.x * rotateSpeed * deltaTime;
-                //            tpsCamera.ValueRW.elevation += -lookingInput.y * rotateSpeed * deltaTime;
-
-                //            tpsCamera.ValueRW.elevation = math.clamp(tpsCamera.ValueRW.elevation, elevationMin, elevationMax);
-                //            tpsCamera.ValueRW.polar     = (tpsCamera.ValueRW.polar % 360f);
-
-                //            var radius                  = tpsCamera.ValueRO.distance;
-                //            var elevation               = math.radians(tpsCamera.ValueRO.elevation);
-                //            var polar                   = math.radians(tpsCamera.ValueRO.polar);
-                //            var spherePosition          = MathUtility.GetSphericalCoordinatesPosition(radius, elevation, polar);
-                //            var cameraPlanarRotation    = MathUtilities.CreateRotationWithUpPriority(math.up(), Camera.main.transform.forward);
-                //            var relativeOffset          = float3.zero;
-                //            var nextPosition            = targetWorldPosition + spherePosition;
-
-                //            var cameraPlanarForward = MathUtilities.GetForwardFromRotation(cameraPlanarRotation);
-                //            var cameraPlanarRight = MathUtilities.GetRightFromRotation(cameraPlanarRotation);
-                //            var cameraPlanarUp = MathUtilities.GetUpFromRotation(cameraPlanarRotation);
-
-                //            relativeOffset += cameraPlanarForward * normalOffset.z;
-                //            relativeOffset += cameraPlanarRight * normalOffset.x;
-                //            relativeOffset += cameraPlanarUp * normalOffset.y;
-
-                //            Camera.main.transform.position = nextPosition;
-                //            Camera.main.transform.LookAt(targetWorldPosition + relativeOffset, Vector3.up);
-                //        }
-                //        break;
-                //    case CameraMode.Aim:
-                //        {
-                //            var targetForward = targetLocalToWorld.ValueRO.Forward;
-                //            var targetRight = targetLocalToWorld.ValueRO.Right;
-                //            var targetUp = targetLocalToWorld.ValueRO.Up;
-
-                //            var aimOffset = tpsCamera.ValueRO.aimOffset;
-                //            var relatedAimCameraPosition = aimOffset.x * targetRight + aimOffset.y * targetUp + aimOffset.z * targetForward;
-                //            var lookingPosition = targetWorldPosition + targetForward * 1000f;
-                //            var cameraRight = Camera.main.transform.worldToLocalMatrix * Camera.main.transform.right;
-                //            tpsCamera.ValueRW.aimXAngle += -lookingInput.y * deltaTime * tpsCamera.ValueRO.rotateSpeed * configs.aimYMultiplier;
-
-                //            Camera.main.transform.position = targetWorldPosition + relatedAimCameraPosition;
-                //            Camera.main.transform.LookAt(lookingPosition);
-                //            Camera.main.transform.Rotate(cameraRight, tpsCamera.ValueRO.aimXAngle, Space.Self);
-                //        }
-                //        break;
-                //    default:
-                //        break;
-                //}
+                
+                var nextRotation = TransformHelpers.LookAtRotation(tpsCameraWorld.ValueRO.Position, lookPosition, math.up());
+                tpsCameraLocal.ValueRW = LocalTransform.FromPositionRotation(nextPosition, nextRotation);
             }
         }
     }

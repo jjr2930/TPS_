@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/OOP/Tables/Editor/TableBaseEditor.uss?fileID=7433441132597879392&amp;guid=7fb3bcb421725d345a69458000258142&amp;type=3#TableBaseEditor" />
+    <ui:Label text="Hello World! From UXML" />
+    <ui:Label text="Hello World! With Style" class="custom-label" />
+    <ui:TreeView data-source="project://database/Assets/TableResources/New%20Item%20Table.asset?fileID=11400000&amp;guid=9f3c8588a030e9644ba305fcbbb624a2&amp;type=2#New Item Table" />
+</ui:UXML>

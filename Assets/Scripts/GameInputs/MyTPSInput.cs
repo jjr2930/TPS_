@@ -91,6 +91,33 @@ namespace MyTPS
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PrimaryWeapon"",
+                    ""type"": ""Button"",
+                    ""id"": ""9dd27bc2-8b0c-4668-8bf9-e4c61b987b3d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SecondaryWeapon"",
+                    ""type"": ""Button"",
+                    ""id"": ""5ca09131-ed4a-43d7-8afc-f23b5bd5394f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Hand"",
+                    ""type"": ""Button"",
+                    ""id"": ""55c1924e-e0eb-49ba-8ed4-2fa5e64bfd7d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -236,6 +263,39 @@ namespace MyTPS
                     ""action"": ""Fire"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a37bbc8c-afff-4836-8da0-f2bfc3d103a9"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PrimaryWeapon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""52d4f797-7fdc-45eb-a8ab-7e7128013065"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SecondaryWeapon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""98a174ef-0bc7-425e-a68d-682c648df1a4"",
+                    ""path"": ""<Keyboard>/6"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Hand"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -251,6 +311,9 @@ namespace MyTPS
             m_HumanAction_Walking = m_HumanAction.FindAction("Walking", throwIfNotFound: true);
             m_HumanAction_Aim = m_HumanAction.FindAction("Aim", throwIfNotFound: true);
             m_HumanAction_Fire = m_HumanAction.FindAction("Fire", throwIfNotFound: true);
+            m_HumanAction_PrimaryWeapon = m_HumanAction.FindAction("PrimaryWeapon", throwIfNotFound: true);
+            m_HumanAction_SecondaryWeapon = m_HumanAction.FindAction("SecondaryWeapon", throwIfNotFound: true);
+            m_HumanAction_Hand = m_HumanAction.FindAction("Hand", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -319,6 +382,9 @@ namespace MyTPS
         private readonly InputAction m_HumanAction_Walking;
         private readonly InputAction m_HumanAction_Aim;
         private readonly InputAction m_HumanAction_Fire;
+        private readonly InputAction m_HumanAction_PrimaryWeapon;
+        private readonly InputAction m_HumanAction_SecondaryWeapon;
+        private readonly InputAction m_HumanAction_Hand;
         public struct HumanActionActions
         {
             private @MyTPSInput m_Wrapper;
@@ -330,6 +396,9 @@ namespace MyTPS
             public InputAction @Walking => m_Wrapper.m_HumanAction_Walking;
             public InputAction @Aim => m_Wrapper.m_HumanAction_Aim;
             public InputAction @Fire => m_Wrapper.m_HumanAction_Fire;
+            public InputAction @PrimaryWeapon => m_Wrapper.m_HumanAction_PrimaryWeapon;
+            public InputAction @SecondaryWeapon => m_Wrapper.m_HumanAction_SecondaryWeapon;
+            public InputAction @Hand => m_Wrapper.m_HumanAction_Hand;
             public InputActionMap Get() { return m_Wrapper.m_HumanAction; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -360,6 +429,15 @@ namespace MyTPS
                 @Fire.started += instance.OnFire;
                 @Fire.performed += instance.OnFire;
                 @Fire.canceled += instance.OnFire;
+                @PrimaryWeapon.started += instance.OnPrimaryWeapon;
+                @PrimaryWeapon.performed += instance.OnPrimaryWeapon;
+                @PrimaryWeapon.canceled += instance.OnPrimaryWeapon;
+                @SecondaryWeapon.started += instance.OnSecondaryWeapon;
+                @SecondaryWeapon.performed += instance.OnSecondaryWeapon;
+                @SecondaryWeapon.canceled += instance.OnSecondaryWeapon;
+                @Hand.started += instance.OnHand;
+                @Hand.performed += instance.OnHand;
+                @Hand.canceled += instance.OnHand;
             }
 
             private void UnregisterCallbacks(IHumanActionActions instance)
@@ -385,6 +463,15 @@ namespace MyTPS
                 @Fire.started -= instance.OnFire;
                 @Fire.performed -= instance.OnFire;
                 @Fire.canceled -= instance.OnFire;
+                @PrimaryWeapon.started -= instance.OnPrimaryWeapon;
+                @PrimaryWeapon.performed -= instance.OnPrimaryWeapon;
+                @PrimaryWeapon.canceled -= instance.OnPrimaryWeapon;
+                @SecondaryWeapon.started -= instance.OnSecondaryWeapon;
+                @SecondaryWeapon.performed -= instance.OnSecondaryWeapon;
+                @SecondaryWeapon.canceled -= instance.OnSecondaryWeapon;
+                @Hand.started -= instance.OnHand;
+                @Hand.performed -= instance.OnHand;
+                @Hand.canceled -= instance.OnHand;
             }
 
             public void RemoveCallbacks(IHumanActionActions instance)
@@ -411,6 +498,9 @@ namespace MyTPS
             void OnWalking(InputAction.CallbackContext context);
             void OnAim(InputAction.CallbackContext context);
             void OnFire(InputAction.CallbackContext context);
+            void OnPrimaryWeapon(InputAction.CallbackContext context);
+            void OnSecondaryWeapon(InputAction.CallbackContext context);
+            void OnHand(InputAction.CallbackContext context);
         }
     }
 }

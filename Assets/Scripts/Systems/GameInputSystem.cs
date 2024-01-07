@@ -6,10 +6,15 @@ using UnityEngine;
 
 namespace MyTPS
 {
+    [UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
     public partial class GameInputSystem : SystemBase
     {
         MyTPSInput input;
-
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+            RequireForUpdate<FixedTickSystem.Singleton>();
+        }
         protected override void OnUpdate()
         {
             if (null == input)

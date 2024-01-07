@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 741eca9bd75860b4b9ecfad4d664d0c2
+guid: f338daaa8f745554cafc5c1663010317
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Run Aiming Strafe Right
+      name: NoWeapon Standing Idle
       takeName: mixamo.com
       internalID: -203655887218126122
       firstFrame: 0
-      lastFrame: 20
+      lastFrame: 418
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

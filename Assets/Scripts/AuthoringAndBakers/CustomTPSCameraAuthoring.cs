@@ -59,7 +59,7 @@ namespace MyTPS
                     target = GetEntity(authoring.target, TransformUsageFlags.Dynamic)
                 });
 
-                AddComponent(entity, new CustomTPSCameraEntity());
+                AddComponent(entity, new MainEntityCamera());
             }
         }
     }

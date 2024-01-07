@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 63e79e9ceb3d1e042ac914e43ec41170
+guid: e33bfe4c57e7b4f4eb0d71852eccbcff
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Rifle Aiming Run Strafe Left
+      name: Rifle Aiming Run Left
       takeName: mixamo.com
       internalID: -203655887218126122
       firstFrame: 0
-      lastFrame: 20
+      lastFrame: 15
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
